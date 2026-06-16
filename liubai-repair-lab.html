@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国乐留白修复所</title>
+<style>
+:root {
+  --font-title: "Songti SC", "STSong", "Noto Serif SC", "KaiTi", serif;
+  --font-body: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --paper: #f6f1e7;
+  --paper-soft: #fbf8f0;
+  --ink: #202722;
+  --muted: #68746f;
+  --line: rgba(32, 39, 34, 0.14);
+  --jade: #2f7a68;
+  --red: #af4f45;
+  --blue: #345d8c;
+  --gold: #aa823d;
+  --surface: rgba(255, 255, 255, 0.7);
+  --shadow: 0 22px 70px rgba(26, 32, 28, 0.14);
+  --clarity: 0;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(47, 122, 104, 0.14), transparent 28%),
+    radial-gradient(circle at 84% 6%, rgba(170, 130, 61, 0.15), transparent 27%),
+    linear-gradient(135deg, #f7f2e8, #edf2ee 54%, #f6efe1);
+  overflow-x: hidden;
+}
+
+button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app {
+  width: min(1240px, calc(100vw - 28px));
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 18px 0 24px;
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr) 286px;
+  gap: 14px;
+}
+
+.panel,
+.stage-shell {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brand {
+  padding: 16px 4px 8px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(32px, 4.4vw, 52px);
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.brand p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.level-btn {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  text-align: left;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  align-items: center;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.level-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 122, 104, 0.35);
+}
+
+.level-btn.active {
+  background: rgba(47, 122, 104, 0.1);
+  border-color: rgba(47, 122, 104, 0.45);
+}
+
+.level-no {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(32, 39, 34, 0.08);
+  color: var(--jade);
+  font-family: var(--font-title);
+}
+
+.level-title {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.level-focus {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.score-card {
+  margin-top: auto;
+  padding: 16px;
+}
+
+.score-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.score-number {
+  margin-top: 4px;
+  font-family: var(--font-title);
+  font-size: 54px;
+  line-height: 1;
+}
+
+.score-state {
+  min-height: 48px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.stage-shell {
+  min-height: calc(100dvh - 42px);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(440px, 1fr) auto;
+}
+
+.stage {
+  position: relative;
+  min-height: 440px;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.18)),
+    radial-gradient(circle at 50% 38%, rgba(47, 122, 104, calc(0.06 + var(--clarity) * 0.12)), transparent 34%);
+}
+
+.scene-title {
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  z-index: 5;
+}
+
+.scene-title h2 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(30px, 4vw, 56px);
+  line-height: 1.05;
+}
+
+.scene-title p {
+  width: min(440px, calc(100vw - 80px));
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.moon {
+  position: absolute;
+  right: 9%;
+  top: 10%;
+  width: clamp(86px, 12vw, 154px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #fffbe9, #e7ca80 64%, rgba(231, 202, 128, 0.2) 70%, transparent 72%);
+  opacity: calc(0.46 + var(--clarity) * 0.42);
+  transform: scale(calc(0.88 + var(--clarity) * 0.12));
+  transition: opacity 240ms ease, transform 240ms ease;
+}
+
+.horizon {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(32, 39, 34, calc(0.26 + var(--clarity) * 0.26)), transparent);
+  transform: rotate(-1deg);
+}
+
+.mountains {
+  position: absolute;
+  inset: auto 0 0;
+  height: 46%;
+  opacity: calc(0.55 + var(--clarity) * 0.28);
+  background:
+    linear-gradient(142deg, transparent 0 25%, rgba(52, 93, 140, 0.2) 25% 42%, transparent 42%),
+    linear-gradient(36deg, transparent 0 34%, rgba(47, 122, 104, 0.2) 34% 56%, transparent 56%),
+    linear-gradient(to top, rgba(32, 39, 34, 0.08), transparent 68%);
+}
+
+.water {
+  position: absolute;
+  left: 10%;
+  right: 13%;
+  bottom: 19%;
+  height: 96px;
+  border-bottom: 1px solid rgba(47, 122, 104, calc(0.18 + var(--clarity) * 0.18));
+  border-radius: 50%;
+  transform: rotate(-2deg);
+}
+
+.breath-field {
+  position: absolute;
+  inset: 12% 9% 18%;
+  border-radius: 50%;
+  border: 1px solid rgba(47, 122, 104, calc(var(--clarity) * 0.23));
+  opacity: var(--clarity);
+  transform: scale(calc(0.72 + var(--clarity) * 0.38));
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.item-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.repair-item {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  min-width: 70px;
+  max-width: 152px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(32, 39, 34, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(26, 32, 28, 0.08);
+  font-size: 13px;
+  line-height: 1.25;
+  transform: translate(-50%, -50%);
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.repair-item.excess {
+  border-color: rgba(175, 79, 69, 0.34);
+  background: rgba(255, 246, 241, 0.9);
+}
+
+.repair-item.core {
+  border-color: rgba(47, 122, 104, 0.28);
+  background: rgba(244, 252, 247, 0.88);
+}
+
+.repair-item:hover {
+  transform: translate(-50%, -50%) translateY(-2px);
+  border-color: rgba(32, 39, 34, 0.32);
+}
+
+.repair-item.removed {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.74);
+  pointer-events: none;
+}
+
+.stage.too-empty .core:not(.removed) {
+  opacity: 0.38;
+}
+
+.stage.too-full .excess:not(.removed) {
+  animation: crowdPulse 1100ms ease-in-out infinite alternate;
+}
+
+@keyframes crowdPulse {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+.stage.audition-crowded .excess:not(.removed) {
+  box-shadow: 0 0 0 4px rgba(175, 79, 69, 0.08), 0 8px 22px rgba(26, 32, 28, 0.08);
+}
+
+.stage.audition-repaired .breath-field {
+  animation: breathe 2200ms ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(calc(0.72 + var(--clarity) * 0.34)); }
+  50% { transform: scale(calc(0.78 + var(--clarity) * 0.42)); }
+}
+
+.workbench {
+  border-top: 1px solid var(--line);
+  background: rgba(246, 241, 231, 0.76);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.tool-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.tool-btn,
+.mode-btn {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.tool-btn:hover,
+.mode-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 122, 104, 0.35);
+}
+
+.tool-btn.primary {
+  background: var(--jade);
+  color: #fff;
+  border-color: rgba(47, 122, 104, 0.35);
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mode-btn.active {
+  color: #fff;
+  background: var(--ink);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.metric {
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.metric label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(32, 39, 34, 0.09);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--jade);
+  transition: width 180ms ease, background 180ms ease;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-card {
+  padding: 16px;
+}
+
+.info-card h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-title);
+  font-size: 22px;
+}
+
+.info-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.removed-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 80px;
+  align-content: flex-start;
+}
+
+.removed-chip {
+  min-height: 30px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 39, 34, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.removed-chip.core {
+  color: var(--red);
+  border-color: rgba(175, 79, 69, 0.34);
+}
+
+.feedback {
+  min-height: 116px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.feedback strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-title);
+  font-size: 24px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.audio-status {
+  margin-top: 10px;
+  min-height: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1040px) {
+  .app {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .right {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .app {
+    grid-template-columns: 1fr;
+    width: min(100vw - 18px, 680px);
+    padding-top: 10px;
+  }
+
+  .left {
+    display: block;
+  }
+
+  .brand {
+    padding-top: 6px;
+  }
+
+  .level-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 12px 0;
+  }
+
+  .score-card {
+    margin-top: 0;
+  }
+
+  .stage-shell {
+    min-height: auto;
+  }
+
+  .stage {
+    min-height: 520px;
+  }
+
+  .tool-row,
+  .metrics,
+  .right {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <aside class="left">
+    <section class="brand">
+      <h1>国乐<br>留白修复所</h1>
+      <p>一段音乐被填得太满时，真正的修复不是再加内容，而是删出可以呼吸的地方。</p>
+    </section>
+
+    <nav class="level-list" aria-label="曲目关卡">
+      <button class="level-btn active" type="button" data-level="0">
+        <span class="level-no">一</span>
+        <span><span class="level-title">平沙落雁</span><span class="level-focus">空间留白</span></span>
+      </button>
+      <button class="level-btn" type="button" data-level="1">
+        <span class="level-no">二</span>
+        <span><span class="level-title">二泉映月</span><span class="level-focus">情感留白</span></span>
+      </button>
+      <button class="level-btn" type="button" data-level="2">
+        <span class="level-no">三</span>
+        <span><span class="level-title">梅花三弄</span><span class="level-focus">结构留白</span></span>
+      </button>
+    </nav>
+
+    <section class="panel score-card" aria-live="polite">
+      <div class="score-label">修复指数</div>
+      <div class="score-number" id="score-number">0</div>
+      <p class="score-state" id="score-state">删去抢戏的填充物，保留能支撑曲意的核心。</p>
+    </section>
+  </aside>
+
+  <section class="stage-shell">
+    <div class="stage too-full" id="stage">
+      <div class="moon"></div>
+      <div class="horizon"></div>
+      <div class="mountains"></div>
+      <div class="water"></div>
+      <div class="breath-field"></div>
+      <div class="scene-title">
+        <h2 id="scene-name">平沙落雁</h2>
+        <p id="scene-brief">删掉抢占天空和水面的元素，让远景重新出现。</p>
+      </div>
+      <div class="item-layer" id="item-layer"></div>
+    </div>
+
+    <section class="workbench">
+      <div class="mode-switch">
+        <button class="mode-btn active" type="button" data-mode="crowded">拥挤版</button>
+        <button class="mode-btn" type="button" data-mode="repaired">修复版</button>
+      </div>
+      <div class="tool-row">
+        <button class="tool-btn primary" type="button" id="play-btn">播放对比</button>
+        <button class="tool-btn" type="button" id="score-btn">提交修复</button>
+        <button class="tool-btn" type="button" id="reset-btn">重新修复</button>
+        <button class="tool-btn" type="button" id="next-btn">下一段</button>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <label>空间释放</label>
+          <div class="bar"><i id="space-bar"></i></div>
+        </div>
+        <div class="metric">
+          <label>核心保留</label>
+          <div class="bar"><i id="core-bar"></i></div>
+        </div>
+        <div class="metric">
+          <label>意味生成</label>
+          <div class="bar"><i id="meaning-bar"></i></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <aside class="right">
+    <section class="panel info-card">
+      <h3 id="task-title">修复目标</h3>
+      <p id="task-text">把画面和声音里抢戏的说明、装饰、重复感删掉，让《平沙落雁》的远景感显出来。</p>
+    </section>
+
+    <section class="panel info-card">
+      <h3>已删内容</h3>
+      <div class="removed-list" id="removed-list"></div>
+      <p class="note">如果删到了核心元素，可以在这里点它放回去。</p>
+    </section>
+
+    <section class="panel info-card">
+      <h3>修复反馈</h3>
+      <div class="feedback" id="feedback">
+        <strong>还未提交</strong>
+        <p class="note">先做取舍，再提交。好的留白不是空白越多越好，而是该留下的仍然成立。</p>
+      </div>
+      <div class="audio-status" id="audio-status">当前对比：拥挤版</div>
+    </section>
+  </aside>
+</main>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+(function() {
+  "use strict";
+
+  var levels = [
+    {
+      title: "平沙落雁",
+      focus: "空间留白",
+      file: "pingshaluoyan.MP3",
+      brief: "删掉抢占天空和水面的元素，让远景重新出现。",
+      task: "把画面和声音里抢戏的说明、装饰、重复感删掉，让《平沙落雁》的远景感显出来。",
+      lesson: "这一关的留白价值是空间。少一点填充，听者才会在雁、沙、水之间补出远方。",
+      items: [
+        ["远处雁影", "core", 73, 30],
+        ["水面一线", "core", 43, 72],
+        ["古琴散音", "core", 31, 48],
+        ["低山轮廓", "core", 58, 62],
+        ["满屏雁群", "excess", 54, 26],
+        ["巨大标题字", "excess", 30, 28],
+        ["密集水纹", "excess", 65, 76],
+        ["过亮云纹", "excess", 78, 48],
+        ["连续解说", "excess", 45, 39],
+        ["装饰边框", "excess", 84, 66],
+        ["近景杂草", "excess", 22, 75],
+        ["重复山线", "excess", 70, 59]
+      ]
+    },
+    {
+      title: "二泉映月",
+      focus: "情感留白",
+      file: "erquanyingyuan.MP3",
+      brief: "删掉替听众规定情绪的标签，让叹息自己停留。",
+      task: "把直接喊出情绪的文字删掉，保留月光、水波和主旋律，让情感在停顿里浮上来。",
+      lesson: "这一关的留白价值是情绪。它不是少表达，而是不替听众把感受说死。",
+      items: [
+        ["主旋律线", "core", 36, 48],
+        ["月光", "core", 73, 24],
+        ["水波", "core", 56, 72],
+        ["一声叹息", "core", 27, 63],
+        ["悲伤", "excess", 48, 28],
+        ["孤独", "excess", 61, 41],
+        ["痛苦说明", "excess", 39, 34],
+        ["必须感动", "excess", 77, 57],
+        ["旁白解释", "excess", 22, 36],
+        ["情绪箭头", "excess", 69, 68],
+        ["加粗泪滴", "excess", 85, 38],
+        ["重复字幕", "excess", 44, 78]
+      ]
+    },
+    {
+      title: "梅花三弄",
+      focus: "结构留白",
+      file: "meihuasannong.MP3",
+      brief: "删掉堵住反复之间气口的枝叶，让三弄形成层次。",
+      task: "保留主题、梅枝和三次回环，删掉把间隙塞满的花瓣与装饰，让重复变成递进。",
+      lesson: "这一关的留白价值是结构。反复之间有气口，第三次出现才会比第一次更远。",
+      items: [
+        ["主题一现", "core", 31, 43],
+        ["主题再现", "core", 51, 52],
+        ["主题三现", "core", 71, 61],
+        ["疏枝", "core", 42, 70],
+        ["花瓣满屏", "excess", 58, 27],
+        ["连续转场", "excess", 43, 31],
+        ["密集节拍点", "excess", 65, 43],
+        ["重复强调", "excess", 79, 49],
+        ["装饰回旋", "excess", 26, 30],
+        ["枝叶堆叠", "excess", 20, 67],
+        ["无停顿字幕", "excess", 53, 78],
+        ["闪烁梅影", "excess", 84, 70]
+      ]
+    }
+  ];
+
+  var state = {
+    level: 0,
+    mode: "crowded",
+    removed: {},
+    playing: false,
+    audioCtx: null,
+    overlayTimer: null
+  };
+
+  var stage = document.getElementById("stage");
+  var itemLayer = document.getElementById("item-layer");
+  var sceneName = document.getElementById("scene-name");
+  var sceneBrief = document.getElementById("scene-brief");
+  var taskText = document.getElementById("task-text");
+  var scoreNumber = document.getElementById("score-number");
+  var scoreState = document.getElementById("score-state");
+  var removedList = document.getElementById("removed-list");
+  var feedback = document.getElementById("feedback");
+  var audio = document.getElementById("audio");
+  var audioStatus = document.getElementById("audio-status");
+  var playBtn = document.getElementById("play-btn");
+  var scoreBtn = document.getElementById("score-btn");
+  var resetBtn = document.getElementById("reset-btn");
+  var nextBtn = document.getElementById("next-btn");
+  var spaceBar = document.getElementById("space-bar");
+  var coreBar = document.getElementById("core-bar");
+  var meaningBar = document.getElementById("meaning-bar");
+  var levelBtns = Array.prototype.slice.call(document.querySelectorAll(".level-btn"));
+  var modeBtns = Array.prototype.slice.call(document.querySelectorAll(".mode-btn"));
+
+  function renderLevel(index) {
+    stopAudio();
+    state.level = index;
+    state.removed = {};
+    var level = levels[index];
+    audio.src = level.file;
+    sceneName.textContent = level.title;
+    sceneBrief.textContent = level.brief;
+    taskText.textContent = level.task;
+    itemLayer.innerHTML = "";
+
+    level.items.forEach(function(item, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "repair-item " + item[1];
+      btn.dataset.id = String(i);
+      btn.style.setProperty("--x", item[2] + "%");
+      btn.style.setProperty("--y", item[3] + "%");
+      btn.textContent = item[0];
+      btn.addEventListener("click", function() {
+        removeItem(i);
+      });
+      itemLayer.appendChild(btn);
+    });
+
+    levelBtns.forEach(function(btn) {
+      btn.classList.toggle("active", Number(btn.dataset.level) === index);
+    });
+
+    feedback.innerHTML = "<strong>还未提交</strong><p class=\"note\">先做取舍，再提交。好的留白不是空白越多越好，而是该留下的仍然成立。</p>";
+    setMode("crowded");
+    updateState();
+  }
+
+  function removeItem(id) {
+    state.removed[id] = true;
+    updateState();
+  }
+
+  function restoreItem(id) {
+    delete state.removed[id];
+    updateState();
+  }
+
+  function resetLevel() {
+    stopAudio();
+    state.removed = {};
+    feedback.innerHTML = "<strong>重新开始</strong><p class=\"note\">这一次试着只删掉抢戏的元素，让核心意象留下。</p>";
+    updateState();
+  }
+
+  function updateState() {
+    var result = calculate();
+    var level = levels[state.level];
+    var clarity = Math.max(0, Math.min(1, result.meaning / 100));
+    stage.style.setProperty("--clarity", clarity.toFixed(3));
+    scoreNumber.textContent = result.score;
+    scoreState.textContent = result.stateText;
+    setBar(spaceBar, result.space);
+    setBar(coreBar, result.core);
+    setBar(meaningBar, result.meaning);
+
+    stage.classList.toggle("too-full", result.space < 55);
+    stage.classList.toggle("too-empty", result.core < 72);
+
+    Array.prototype.slice.call(itemLayer.children).forEach(function(el) {
+      el.classList.toggle("removed", Boolean(state.removed[el.dataset.id]));
+    });
+
+    removedList.innerHTML = "";
+    var removedIds = Object.keys(state.removed);
+    if (!removedIds.length) {
+      var empty = document.createElement("span");
+      empty.className = "note";
+      empty.textContent = "还没有删去任何内容。";
+      removedList.appendChild(empty);
+    } else {
+      removedIds.forEach(function(id) {
+        var item = level.items[Number(id)];
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "removed-chip " + item[1];
+        chip.textContent = item[0];
+        chip.addEventListener("click", function() {
+          restoreItem(Number(id));
+        });
+        removedList.appendChild(chip);
+      });
+    }
+  }
+
+  function calculate() {
+    var level = levels[state.level];
+    var excessTotal = 0;
+    var excessRemoved = 0;
+    var coreTotal = 0;
+    var coreRemoved = 0;
+
+    level.items.forEach(function(item, i) {
+      if (item[1] === "excess") {
+        excessTotal += 1;
+        if (state.removed[i]) excessRemoved += 1;
+      } else {
+        coreTotal += 1;
+        if (state.removed[i]) coreRemoved += 1;
+      }
+    });
+
+    var space = Math.round(excessRemoved / Math.max(1, excessTotal) * 100);
+    var core = Math.round((1 - coreRemoved / Math.max(1, coreTotal)) * 100);
+    var restraint = 100 - Math.abs(space - 82) * 0.42;
+    restraint = Math.max(0, Math.min(100, restraint));
+    var meaning = Math.round(space * 0.48 + core * 0.36 + restraint * 0.16);
+    var score = Math.round(space * 0.45 + core * 0.35 + meaning * 0.2);
+
+    var stateText = "还偏满：画面仍在替音乐说太多话。";
+    if (core < 72) {
+      stateText = "有点空：核心意象被删伤了，音乐失去支点。";
+    } else if (score >= 85) {
+      stateText = "修复得很稳：声音退后，空间、情绪或结构反而出现。";
+    } else if (score >= 68) {
+      stateText = "已经有呼吸：再少留一点抢戏元素，会更从容。";
+    }
+
+    return { space: space, core: core, meaning: meaning, score: score, stateText: stateText };
+  }
+
+  function setBar(el, value) {
+    var width = Math.max(0, Math.min(100, value));
+    el.style.width = width + "%";
+    el.style.background = width >= 72 ? "var(--jade)" : (width >= 50 ? "var(--gold)" : "var(--red)");
+  }
+
+  function submitRepair() {
+    var result = calculate();
+    var level = levels[state.level];
+    var title = "仍然太满";
+    if (result.core < 72) title = "删得太空";
+    else if (result.score >= 85) title = "留白成立";
+    else if (result.score >= 68) title = "接近成立";
+
+    feedback.innerHTML =
+      "<strong>" + title + "</strong>" +
+      "<p class=\"note\">" + result.stateText + "</p>" +
+      "<p class=\"note\">" + level.lesson + "</p>";
+    setMode("repaired");
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    modeBtns.forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+    stage.classList.toggle("audition-crowded", mode === "crowded");
+    stage.classList.toggle("audition-repaired", mode === "repaired");
+    audioStatus.textContent = "当前对比：" + (mode === "crowded" ? "拥挤版" : "修复版");
+    if (state.playing) {
+      applyAudioMode();
+      if (mode === "crowded") startOverlay();
+      else stopOverlay();
+      audioStatus.textContent = "正在播放：" + (mode === "crowded" ? "拥挤版" : "修复版");
+    }
+  }
+
+  function toggleAudio() {
+    if (state.playing) {
+      stopAudio();
+      return;
+    }
+    playAudio();
+  }
+
+  function playAudio() {
+    stopOverlay();
+    audio.currentTime = 0;
+    applyAudioMode();
+    audio.play().then(function() {
+      state.playing = true;
+      playBtn.textContent = "暂停";
+      audioStatus.textContent = "正在播放：" + (state.mode === "crowded" ? "拥挤版" : "修复版");
+      if (state.mode === "crowded") startOverlay();
+    }).catch(function() {
+      state.playing = false;
+      playBtn.textContent = "播放对比";
+      audioStatus.textContent = "浏览器需要一次真实点击后才能播放。";
+    });
+  }
+
+  function stopAudio() {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.volume = 1;
+    audio.playbackRate = 1;
+    state.playing = false;
+    playBtn.textContent = "播放对比";
+    stopOverlay();
+  }
+
+  function applyAudioMode() {
+    if (state.mode === "crowded") {
+      audio.volume = 0.92;
+      audio.playbackRate = 1.06;
+    } else {
+      audio.volume = 0.96;
+      audio.playbackRate = 0.98;
+      stopOverlay();
+    }
+  }
+
+  function ensureAudioContext() {
+    if (!state.audioCtx) {
+      try {
+        state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (err) {
+        state.audioCtx = null;
+      }
+    }
+    if (state.audioCtx && state.audioCtx.state === "suspended") {
+      state.audioCtx.resume();
+    }
+    return state.audioCtx;
+  }
+
+  function startOverlay() {
+    var ctx = ensureAudioContext();
+    if (!ctx) return;
+    stopOverlay();
+    state.overlayTimer = window.setInterval(function() {
+      if (!state.playing || state.mode !== "crowded") return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 520 + Math.random() * 360;
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    }, 420);
+  }
+
+  function stopOverlay() {
+    if (state.overlayTimer) {
+      window.clearInterval(state.overlayTimer);
+      state.overlayTimer = null;
+    }
+  }
+
+  function nextLevel() {
+    renderLevel((state.level + 1) % levels.length);
+  }
+
+  levelBtns.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      renderLevel(Number(btn.dataset.level));
+    });
+  });
+
+  modeBtns.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      setMode(btn.dataset.mode);
+    });
+  });
+
+  playBtn.addEventListener("click", toggleAudio);
+  scoreBtn.addEventListener("click", submitRepair);
+  resetBtn.addEventListener("click", resetLevel);
+  nextBtn.addEventListener("click", nextLevel);
+
+  audio.addEventListener("ended", function() {
+    state.playing = false;
+    playBtn.textContent = "播放对比";
+    stopOverlay();
+    audioStatus.textContent = "播放结束：" + (state.mode === "crowded" ? "拥挤版" : "修复版");
+  });
+
+  audio.addEventListener("error", function() {
+    audioStatus.textContent = "没有读取到音频文件，请确认 HTML 与 MP3 在同一文件夹。";
+  });
+
+  renderLevel(0);
+})();
+</script>
+</body>
+</html>
